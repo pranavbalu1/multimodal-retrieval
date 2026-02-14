@@ -11,4 +11,5 @@ public class ProductDTO {
     private String masterCategory;
     private String subCategory;
     private String baseColour;
+    private Double similarity;
 }

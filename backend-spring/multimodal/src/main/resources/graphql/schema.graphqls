@@ -4,6 +4,7 @@ type Product {
     masterCategory: String
     subCategory: String
     baseColour: String
+    similarity: Float
 }
 
 type Query {
