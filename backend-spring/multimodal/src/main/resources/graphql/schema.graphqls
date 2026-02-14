@@ -1,0 +1,11 @@
+type Product {
+    id: ID
+    productDisplayName: String
+    masterCategory: String
+    subCategory: String
+    baseColour: String
+}
+
+type Query {
+    searchProducts(query: String!, topN: Int!): [Product]
+}

@@ -1,0 +1,34 @@
+├── multimodal/
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/
+│   │   │   │   └── com/
+│   │   │   │       └── example/
+│   │   │   │           └── multimodal/
+│   │   │   │               ├── controller/
+│   │   │   │               │   └── SearchController.java (0.7 KB)
+│   │   │   │               ├── dto/
+│   │   │   │               │   └── ProductDTO.java (0.3 KB)
+│   │   │   │               ├── repository/
+│   │   │   │               │   └── ProductRepository.java (1.5 KB)
+│   │   │   │               ├── service/
+│   │   │   │               │   └── SearchService.java (1.1 KB)
+│   │   │   │               └── MultimodalApplication.java (0.3 KB)
+│   │   │   └── resources/
+│   │   │       ├── graphql/
+│   │   │       │   └── schema.graphqls (0.2 KB)
+│   │   │       ├── static/
+│   │   │       ├── templates/
+│   │   │       └── application.properties (0.3 KB)
+│   │   ├── test/
+│   │   │   └── java/
+│   │   │       └── com/
+│   │   │           └── example/
+│   │   │               └── multimodal/
+│   │   │                   └── MultimodalApplicationTests.java (0.2 KB)
+│   │   └── project-structure.txt (1.1 KB)
+│   ├── HELP.md (1.6 KB)
+│   ├── mvnw (11.5 KB)
+│   ├── mvnw.cmd (8.1 KB)
+│   └── pom.xml (2.7 KB)
+└── project-structure.txt (0.9 KB)
