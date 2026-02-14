@@ -6,3 +6,9 @@ sentence-transformers>=2.2
 torch>=2.0
 transformers>=4.35
 
+fastapi
+uvicorn
+transformers
+sentence-transformers
+torch
+pydantic
