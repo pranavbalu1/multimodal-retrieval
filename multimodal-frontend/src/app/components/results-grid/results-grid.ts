@@ -71,10 +71,10 @@ export class ResultsGrid implements OnChanges {
   }
 
   getConfidenceLabel(similarity: number): string {
-    if (similarity >= 0.12) {
+    if (similarity >= 0.225) {
       return 'High match';
     }
-    if (similarity >= 0.08) {
+    if (similarity >= 0.16) {
       return 'Moderate match';
     }
     return 'Candidate match';
