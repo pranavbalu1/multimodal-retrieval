@@ -1,0 +1,31 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.product-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.75rem;
+  background: #fff;
+}
+
+.product-card h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+}
+
+.meta {
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.similarity {
+  font-weight: 600;
+}
+
+.no-results {
+  margin-top: 1rem;
+}

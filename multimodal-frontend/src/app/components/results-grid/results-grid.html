@@ -1,13 +1,11 @@
-<div *ngIf="products?.length; else noResults">
-  <ul>
-    <li *ngFor="let product of products">
-      <strong>{{ product.productDisplayName }}</strong>
-      <!-- Remove number pipe temporarily -->
-      <span>Similarity: {{ product.similarity }}</span>
-    </li>
-  </ul>
+<div *ngIf="products.length; else noResults" class="grid">
+  <article class="product-card" *ngFor="let product of products">
+    <h3>{{ product.productDisplayName }}</h3>
+    <p class="meta">ID: {{ product.id }}</p>
+    <p class="similarity">Similarity: {{ product.similarity | number: '1.2-4' }}</p>
+  </article>
 </div>
 
 <ng-template #noResults>
-  <p>No products found.</p>
+  <p class="no-results">No products found.</p>
 </ng-template>
