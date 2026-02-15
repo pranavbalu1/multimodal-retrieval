@@ -1,0 +1,7 @@
+<div class="app-container">
+  <app-search-bar (search)="performSearch($event)"></app-search-bar>
+  <app-loading-indicator *ngIf="loading"></app-loading-indicator>
+  <p *ngIf="error" style="color:red">{{ error }}</p>
+  <app-results-grid [products]="products"></app-results-grid>
+  
+</div>

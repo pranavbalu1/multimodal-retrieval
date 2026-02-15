@@ -1,0 +1,8 @@
+<div>
+  <input
+    [(ngModel)]="query"
+    placeholder="Search products..."
+    (keyup.enter)="onSearch()"
+  />
+  <button (click)="onSearch()">Search</button>
+</div>

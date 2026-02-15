@@ -1,0 +1,13 @@
+<div *ngIf="products?.length; else noResults">
+  <ul>
+    <li *ngFor="let product of products">
+      <strong>{{ product.productDisplayName }}</strong>
+      <!-- Remove number pipe temporarily -->
+      <span>Similarity: {{ product.similarity }}</span>
+    </li>
+  </ul>
+</div>
+
+<ng-template #noResults>
+  <p>No products found.</p>
+</ng-template>
