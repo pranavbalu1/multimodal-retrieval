@@ -78,4 +78,25 @@ describe('ResultsGrid', () => {
     expect(image).toBeTruthy();
     expect(image.nativeElement.getAttribute('src')).toContain('product.jpg');
   });
+
+  it('should paginate results when more than 10 products are returned', () => {
+    component.hasSearched = true;
+    component.products = Array.from({ length: 12 }, (_, index) => ({
+      id: `${index + 1}`,
+      productDisplayName: `product-${index + 1}`,
+      similarity: 0.2
+    }));
+    fixture.detectChanges();
+
+    const pageOneCards = fixture.debugElement.queryAll(By.css('.result-card'));
+    expect(pageOneCards.length).toBe(10);
+    expect(fixture.nativeElement.textContent).toContain('Showing 1-10 of 12');
+
+    component.goToPage(2);
+    fixture.detectChanges();
+
+    const pageTwoCards = fixture.debugElement.queryAll(By.css('.result-card'));
+    expect(pageTwoCards.length).toBe(2);
+    expect(fixture.nativeElement.textContent).toContain('Showing 11-12 of 12');
+  });
 });

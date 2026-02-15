@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { SearchBar } from './components/search-bar/search-bar';
+import { SearchBar, SearchRequest } from './components/search-bar/search-bar';
 import { ResultsGrid } from './components/results-grid/results-grid';
 import { LoadingIndicator } from './components/loading-indicator/loading-indicator';
 import { SearchState, SearchStore } from './store/search.store';
@@ -29,7 +29,7 @@ export class App {
     this.state$ = this.searchStore.state$;
   }
 
-  performSearch(query: string) {
-    this.searchStore.performSearch(query, 5);
+  performSearch(request: SearchRequest) {
+    this.searchStore.performSearch(request.query, request.topN);
   }
 }

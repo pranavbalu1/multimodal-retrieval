@@ -1,8 +1,9 @@
 <section class="search-panel">
   <form class="search-panel__form" (ngSubmit)="onSearch()">
-    <label class="search-panel__label" for="product-search-input">
-      Search Query
-    </label>
+    <div class="search-panel__labels">
+      <label class="search-panel__label" for="product-search-input">Search Query</label>
+      <label class="search-panel__label" for="result-count-select">Results</label>
+    </div>
     <div class="search-panel__field-wrap">
       <span class="search-panel__icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" focusable="false">
@@ -19,6 +20,14 @@
         placeholder="Try: red rose camisole"
         autocomplete="off"
       />
+      <select
+        id="result-count-select"
+        [(ngModel)]="topN"
+        name="topN"
+        aria-label="Number of results to fetch"
+      >
+        <option *ngFor="let option of topNOptions" [ngValue]="option">{{ option }}</option>
+      </select>
       <button type="submit">Search</button>
     </div>
     <p class="search-panel__hint">

@@ -9,7 +9,7 @@
 
   <div *ngIf="products.length; else noResults" class="results-grid">
     <article
-      *ngFor="let product of products; trackBy: trackByProductId; let idx = index"
+      *ngFor="let product of paginatedProducts; trackBy: trackByProductId; let idx = index"
       class="result-card"
     >
       <div class="result-card__media">
@@ -21,7 +21,7 @@
         />
         <ng-template #imagePlaceholder>
           <div class="result-card__placeholder">
-            <span aria-hidden="true">▦</span>
+            <span aria-hidden="true">[]</span>
             Image source pending
           </div>
         </ng-template>
@@ -29,7 +29,7 @@
 
       <div class="result-card__content">
         <div class="result-card__meta">
-          <span class="result-card__rank">#{{ idx + 1 }}</span>
+          <span class="result-card__rank">#{{ (currentPage - 1) * pageSize + idx + 1 }}</span>
           <span class="result-card__score">
             {{ getSimilarityPercent(product.similarity) | number: '1.1-1' }}%
           </span>
@@ -51,6 +51,42 @@
       </div>
     </article>
   </div>
+
+  <nav *ngIf="totalPages > 1" class="results-pagination" aria-label="Search result pages">
+    <p class="results-pagination__summary">
+      Showing {{ displayStart }}-{{ displayEnd }} of {{ products.length }}
+    </p>
+
+    <div class="results-pagination__controls">
+      <button
+        type="button"
+        class="results-pagination__nav-btn"
+        (click)="previousPage()"
+        [disabled]="currentPage === 1"
+      >
+        Previous
+      </button>
+
+      <button
+        *ngFor="let page of pageNumbers"
+        type="button"
+        class="results-pagination__page-btn"
+        [class.results-pagination__page-btn--active]="page === currentPage"
+        (click)="goToPage(page)"
+      >
+        {{ page }}
+      </button>
+
+      <button
+        type="button"
+        class="results-pagination__nav-btn"
+        (click)="nextPage()"
+        [disabled]="currentPage === totalPages"
+      >
+        Next
+      </button>
+    </div>
+  </nav>
 
   <ng-template #noResults>
     <p class="empty-state">

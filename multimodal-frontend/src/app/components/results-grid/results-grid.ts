@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Product } from '../../services/search';
 
@@ -10,13 +10,60 @@ import { Product } from '../../services/search';
   styleUrls: ['./results-grid.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ResultsGrid {
+export class ResultsGrid implements OnChanges {
+  readonly pageSize = 8;
   @Input() products: Product[] = [];
   @Input() hasSearched = false;
   @Input() query = '';
+  currentPage = 1;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['products']) {
+      this.currentPage = 1;
+    }
+  }
 
   trackByProductId(_: number, product: Product): string {
     return product.id;
+  }
+
+  get paginatedProducts(): Product[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.products.slice(start, start + this.pageSize);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.products.length / this.pageSize);
+  }
+
+  get pageNumbers(): number[] {
+    return Array.from({ length: this.totalPages }, (_, index) => index + 1);
+  }
+
+  get displayStart(): number {
+    if (!this.products.length) {
+      return 0;
+    }
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get displayEnd(): number {
+    return Math.min(this.currentPage * this.pageSize, this.products.length);
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) {
+      return;
+    }
+    this.currentPage = page;
+  }
+
+  previousPage(): void {
+    this.goToPage(this.currentPage - 1);
+  }
+
+  nextPage(): void {
+    this.goToPage(this.currentPage + 1);
   }
 
   getSimilarityPercent(similarity: number): number {

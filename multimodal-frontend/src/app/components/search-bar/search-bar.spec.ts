@@ -20,4 +20,17 @@ describe('SearchBar', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should emit query and selected result count on search', () => {
+    spyOn(component.search, 'emit');
+    component.query = 'red dress';
+    component.topN = 30;
+
+    component.onSearch();
+
+    expect(component.search.emit).toHaveBeenCalledWith({
+      query: 'red dress',
+      topN: 30
+    });
+  });
 });
