@@ -1,7 +1,7 @@
-<div>
+<div class="search-bar">
   <input
     [(ngModel)]="query"
-    placeholder="Search products..."
+    placeholder="Search products (e.g. red dress)"
     (keyup.enter)="onSearch()"
   />
   <button (click)="onSearch()">Search</button>

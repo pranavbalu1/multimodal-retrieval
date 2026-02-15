@@ -1,0 +1,11 @@
+.upload-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+}
+
+label {
+  font-size: 0.9rem;
+  color: #333;
+}

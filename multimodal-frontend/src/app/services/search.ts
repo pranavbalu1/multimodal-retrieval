@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 
 export interface Product {
   id: string;
@@ -9,29 +8,49 @@ export interface Product {
   similarity: number;
 }
 
+interface SearchResponse {
+  data?: {
+    searchProducts?: Product[];
+  };
+  errors?: Array<{ message: string }>;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class SearchService {
-  private apiUrl = '/api/graphql';
+  private readonly apiUrl = '/api/graphql';
 
   constructor(private http: HttpClient) {}
 
   searchProducts(query: string, topN: number): Observable<Product[]> {
-    const graphqlQuery = {
+    const body = {
       query: `
-        query {
-          searchProducts(query: "${query}", topN: ${topN}) {
+        query SearchProducts($query: String!, $topN: Int!) {
+          searchProducts(query: $query, topN: $topN) {
             id
             productDisplayName
             similarity
           }
         }
-      `
+      `,
+      variables: {
+        query,
+        topN
+      }
     };
 
-    return this.http.post<any>(this.apiUrl, graphqlQuery).pipe(
-      map((res) => res.data?.searchProducts || [])
+    return this.http.post<SearchResponse>(this.apiUrl, body).pipe(
+      map((response) => {
+        if (response.errors?.length) {
+          throw new Error(response.errors[0].message);
+        }
+
+        return response.data?.searchProducts ?? [];
+      }),
+      catchError(() => {
+        return throwError(() => new Error('Could not reach backend service.'));
+      })
     );
   }
 }
