@@ -1,1 +1,55 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --surface-page: #eef3f7;
+  --surface-base: #ffffff;
+  --surface-soft: #f7fafc;
+  --surface-accent: #e7f0ff;
+  --ink-primary: #10243b;
+  --ink-secondary: #4f6174;
+  --ink-muted: #71859a;
+  --line-default: #d8e1ea;
+  --line-strong: #bfd0e2;
+  --brand-primary: #0b67c2;
+  --brand-primary-soft: #d9e9ff;
+  --positive: #0f7f4f;
+  --positive-soft: #d9f4e7;
+  --warning: #8f5a00;
+  --warning-soft: #ffeecf;
+  --danger: #a0222a;
+  --danger-soft: #fde7ea;
+  --shadow-soft: 0 14px 28px rgba(9, 34, 61, 0.08);
+  --shadow-hover: 0 18px 38px rgba(9, 34, 61, 0.14);
+  --radius-md: 14px;
+  --radius-lg: 20px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 12% -10%, #d8e6ff 0%, rgba(216, 230, 255, 0) 44%),
+    radial-gradient(circle at 84% -14%, #cde7df 0%, rgba(205, 231, 223, 0) 40%),
+    linear-gradient(180deg, #f4f8fb 0%, var(--surface-page) 48%, #e9eff5 100%);
+  color: var(--ink-primary);
+  font-family: 'Manrope', 'Segoe UI', 'Trebuchet MS', sans-serif;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}

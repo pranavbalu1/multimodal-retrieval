@@ -1,3 +1,23 @@
-<div class="loading-indicator">
-  <p>Loading...</p>
-</div>
+<section class="loading-state" role="status" aria-live="polite">
+  <header class="loading-state__header">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <p class="loading-state__title">Processing search request</p>
+      <p class="loading-state__subtitle">
+        Computing embeddings and ranking best matching products.
+      </p>
+    </div>
+  </header>
+
+  <div class="loading-state__skeleton-grid">
+    <article
+      *ngFor="let placeholder of placeholders; trackBy: trackByIndex"
+      class="loading-card"
+    >
+      <div class="loading-card__media shimmer"></div>
+      <div class="loading-card__line shimmer"></div>
+      <div class="loading-card__line loading-card__line--short shimmer"></div>
+      <div class="loading-card__line loading-card__line--tiny shimmer"></div>
+    </article>
+  </div>
+</section>

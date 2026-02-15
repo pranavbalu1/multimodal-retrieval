@@ -1,7 +1,25 @@
-<div class="app-container">
-  <app-search-bar (search)="performSearch($event)"></app-search-bar>
-  <app-loading-indicator *ngIf="loading"></app-loading-indicator>
-  <p *ngIf="error" style="color:red">{{ error }}</p>
-  <app-results-grid [products]="products"></app-results-grid>
-  
-</div>
+<main class="app-shell">
+  <header class="hero">
+    <p class="hero__eyebrow">Multimodal Catalog Search</p>
+    <h1>Enterprise Product Discovery</h1>
+    <p class="hero__description">
+      Search your catalog with natural language and retrieve ranked products with
+      transparent relevance scoring.
+    </p>
+  </header>
+
+  <section class="workspace">
+    <app-search-bar (search)="performSearch($event)"></app-search-bar>
+
+    <ng-container *ngIf="state$ | async as state">
+      <app-loading-indicator *ngIf="state.loading"></app-loading-indicator>
+      <p *ngIf="state.error" class="error-message">{{ state.error }}</p>
+      <app-results-grid
+        *ngIf="!state.loading"
+        [products]="state.products"
+        [hasSearched]="state.hasSearched"
+        [query]="state.query"
+      ></app-results-grid>
+    </ng-container>
+  </section>
+</main>

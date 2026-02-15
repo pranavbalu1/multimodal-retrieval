@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -6,6 +6,13 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './loading-indicator.html',
-  styleUrls: ['./loading-indicator.scss']
+  styleUrls: ['./loading-indicator.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LoadingIndicator {}
+export class LoadingIndicator {
+  readonly placeholders = [1, 2, 3, 4];
+
+  trackByIndex(index: number): number {
+    return index;
+  }
+}

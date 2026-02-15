@@ -1,8 +1,39 @@
-<div>
-  <input
-    [(ngModel)]="query"
-    placeholder="Search products..."
-    (keyup.enter)="onSearch()"
-  />
-  <button (click)="onSearch()">Search</button>
-</div>
+<section class="search-panel">
+  <form class="search-panel__form" (ngSubmit)="onSearch()">
+    <label class="search-panel__label" for="product-search-input">
+      Search Query
+    </label>
+    <div class="search-panel__field-wrap">
+      <span class="search-panel__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path
+            d="M15.8 14.4h-.73l-.26-.25a6.25 6.25 0 1 0-.67.67l.25.26v.73L19 20.2 20.2 19l-4.4-4.6Zm-5.3 0A4.85 4.85 0 1 1 15.35 9.6a4.86 4.86 0 0 1-4.85 4.8Z"
+          />
+        </svg>
+      </span>
+
+      <input
+        id="product-search-input"
+        [(ngModel)]="query"
+        name="query"
+        placeholder="Try: red rose camisole"
+        autocomplete="off"
+      />
+      <button type="submit">Search</button>
+    </div>
+    <p class="search-panel__hint">
+      Optimized for natural-language product discovery and multimodal ranking.
+    </p>
+  </form>
+
+  <div class="search-panel__quick-actions">
+    <button
+      *ngFor="let quickQuery of quickQueries"
+      type="button"
+      class="search-panel__quick-pill"
+      (click)="useQuickQuery(quickQuery)"
+    >
+      {{ quickQuery }}
+    </button>
+  </div>
+</section>

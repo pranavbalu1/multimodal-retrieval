@@ -64,7 +64,8 @@
               "buildTarget": "multimodal-frontend:build:production"
             },
             "development": {
-              "buildTarget": "multimodal-frontend:build:development"
+              "buildTarget": "multimodal-frontend:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

@@ -7,6 +7,13 @@ export interface Product {
   id: string;
   productDisplayName: string;
   similarity: number;
+  imageUrl?: string | null;
+}
+
+interface SearchProductsResponse {
+  data?: {
+    searchProducts?: Product[];
+  };
 }
 
 @Injectable({
@@ -20,18 +27,27 @@ export class SearchService {
   searchProducts(query: string, topN: number): Observable<Product[]> {
     const graphqlQuery = {
       query: `
-        query {
-          searchProducts(query: "${query}", topN: ${topN}) {
+        query SearchProducts($query: String!, $topN: Int!) {
+          searchProducts(query: $query, topN: $topN) {
             id
             productDisplayName
             similarity
+            # Add imageUrl here when backend schema supports it.
+            # imageUrl
           }
         }
-      `
+      `,
+      variables: {
+        query,
+        topN
+      }
     };
 
-    return this.http.post<any>(this.apiUrl, graphqlQuery).pipe(
-      map((res) => res.data?.searchProducts || [])
+    return this.http.post<SearchProductsResponse>(this.apiUrl, graphqlQuery).pipe(
+      map((res) => (res.data?.searchProducts ?? []).map((product) => ({
+        ...product,
+        imageUrl: product.imageUrl ?? null
+      })))
     );
   }
 }

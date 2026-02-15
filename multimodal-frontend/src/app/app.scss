@@ -1,0 +1,89 @@
+:host {
+  display: block;
+}
+
+.app-shell {
+  margin: 0 auto;
+  max-width: 1200px;
+  padding: 2rem 1rem 2.5rem;
+}
+
+.hero {
+  background: linear-gradient(135deg, #f8fbff 0%, #edf4fb 56%, #e5eff9 100%);
+  border: 1px solid var(--line-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 1.25rem;
+  overflow: hidden;
+  padding: 1.75rem 1.25rem;
+  position: relative;
+}
+
+.hero::after {
+  background: linear-gradient(
+    128deg,
+    rgba(11, 103, 194, 0.09) 0%,
+    rgba(15, 127, 79, 0.08) 100%
+  );
+  border-radius: 100%;
+  content: '';
+  height: 220px;
+  pointer-events: none;
+  position: absolute;
+  right: -85px;
+  top: -122px;
+  width: 220px;
+}
+
+.hero__eyebrow {
+  color: var(--brand-primary);
+  font-family: 'IBM Plex Mono', 'Consolas', monospace;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  font-size: clamp(1.45rem, 2.8vw, 2.05rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.hero__description {
+  color: var(--ink-secondary);
+  margin-top: 0.75rem;
+  max-width: 70ch;
+}
+
+.workspace {
+  background: var(--surface-base);
+  border: 1px solid var(--line-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: 1rem;
+}
+
+.error-message {
+  background: var(--danger-soft);
+  border: 1px solid #f1c3cb;
+  border-radius: 12px;
+  color: var(--danger);
+  font-weight: 600;
+  margin-top: 0.85rem;
+  padding: 0.75rem 0.9rem;
+}
+
+@media (min-width: 768px) {
+  .app-shell {
+    padding: 2.25rem 1.4rem 2.75rem;
+  }
+
+  .hero {
+    padding: 2.1rem 2rem;
+  }
+
+  .workspace {
+    padding: 1.35rem 1.2rem 1.2rem;
+  }
+}
