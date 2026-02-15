@@ -48,9 +48,10 @@ export class SearchService {
 
         return response.data?.searchProducts ?? [];
       }),
-      catchError((error: unknown) => {
-        const message = error instanceof Error ? error.message : 'Could not reach backend service.';
-        return throwError(() => new Error(message));
+
+      catchError(() => {
+        return throwError(() => new Error('Could not reach backend service.'));
+
       })
     );
   }
