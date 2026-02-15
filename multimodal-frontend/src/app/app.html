@@ -1,7 +1,20 @@
 <div class="app-container">
+  <h1>Multimodal Product Search</h1>
+
   <app-search-bar (search)="performSearch($event)"></app-search-bar>
+  <app-image-upload (imageSelected)="onImageSelected($event)"></app-image-upload>
+
+  <p *ngIf="selectedImageName" class="image-hint">Selected image: {{ selectedImageName }}</p>
+
   <app-loading-indicator *ngIf="loading"></app-loading-indicator>
-  <p *ngIf="error" style="color:red">{{ error }}</p>
-  <app-results-grid [products]="products"></app-results-grid>
-  
+
+  <p *ngIf="error" class="error-message">{{ error }}</p>
+
+  <app-results-grid *ngIf="!loading" [products]="pagedProducts"></app-results-grid>
+
+  <div *ngIf="hasResults && !loading" class="pagination">
+    <button (click)="previousPage()" [disabled]="currentPage === 1">Previous</button>
+    <span>Page {{ currentPage }} of {{ totalPages }}</span>
+    <button (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+  </div>
 </div>
