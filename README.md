@@ -2,6 +2,16 @@
 
 An end-to-end semantic product search system for fashion catalog data.
 
+## 🎥 Demo Video
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=wk8gMumtAfE">
+    <img src="assets/demo-thumbnail.png" width="700">
+  </a>
+</p>
+
+
+
 This monorepo contains:
 - A **FastAPI embedding service** (Python) that generates normalized text embeddings and serves product images
 - A **Spring Boot GraphQL API** (Java) that orchestrates embedding + vector search in Postgres
