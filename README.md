@@ -6,7 +6,7 @@ An end-to-end semantic product search system for fashion catalog data.
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=wk8gMumtAfE">
-    <img src="assets/demo-thumbnail.png" width="700">
+    <img src="assets/thumbnail.png" width="700">
   </a>
 </p>
 
