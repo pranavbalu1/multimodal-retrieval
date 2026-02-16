@@ -8,6 +8,9 @@ This monorepo contains:
 - An **Angular frontend** (TypeScript) with a Redux-style store, enterprise UI, and paginated result grid
 - Data and ingestion scripts for preprocessing and indexing product embeddings in **Postgres + pgvector**
 
+**Developer Note:** This project uses multiple backend layers intentionally to explore and experiment with advanced system design concepts. The structure is meant for learning and exploration, not necessarily optimized for efficiency.
+
+
 ## Monorepo Layout
 
 ```text
