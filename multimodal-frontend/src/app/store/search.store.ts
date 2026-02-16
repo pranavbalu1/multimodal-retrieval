@@ -82,6 +82,28 @@ export class SearchStore {
     });
   }
 
+  performImageSearch(file: File, topN: number): void {
+    this.dispatch({
+      type: 'SEARCH_REQUEST',
+      payload: { query: `Image: ${file.name}` }
+    });
+
+    this.searchService.searchProductsByImage(file, topN).subscribe({
+      next: (products) => {
+        this.dispatch({
+          type: 'SEARCH_SUCCESS',
+          payload: { products }
+        });
+      },
+      error: () => {
+        this.dispatch({
+          type: 'SEARCH_FAILURE',
+          payload: { error: 'Failed to fetch image search results' }
+        });
+      }
+    });
+  }
+
   private dispatch(action: SearchAction): void {
     const nextState = searchReducer(this.stateSubject.value, action);
     this.stateSubject.next(nextState);

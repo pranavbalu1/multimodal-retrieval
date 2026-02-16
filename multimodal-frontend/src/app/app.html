@@ -9,7 +9,10 @@
   </header>
 
   <section class="workspace">
-    <app-search-bar (search)="performSearch($event)"></app-search-bar>
+    <app-search-bar
+      (search)="performSearch($event)"
+      (imageSearch)="performImageSearch($event)"
+    ></app-search-bar>
 
     <ng-container *ngIf="state$ | async as state">
       <app-loading-indicator *ngIf="state.loading"></app-loading-indicator>

@@ -10,9 +10,16 @@ export interface Product {
   imageUrl?: string | null;
 }
 
+interface ApiProduct {
+  id: string | number;
+  productDisplayName: string;
+  similarity: number;
+  imageUrl?: string | null;
+}
+
 interface SearchProductsResponse {
   data?: {
-    searchProducts?: Product[];
+    searchProducts?: ApiProduct[];
   };
 }
 
@@ -21,12 +28,25 @@ interface SearchProductsResponse {
 })
 export class SearchService {
   private apiUrl = '/api/graphql';
+  private imageSearchApiUrl = '/api/image-search';
   private imageApiPath = '/image';
 
   constructor(private http: HttpClient) {}
 
   private buildImageUrl(itemId: string): string {
     return `${this.imageApiPath}/${encodeURIComponent(itemId)}`;
+  }
+
+  private normalizeProducts(products: ApiProduct[]): Product[] {
+    return products.map((product) => {
+      const id = String(product.id);
+      return {
+        id,
+        productDisplayName: product.productDisplayName,
+        similarity: product.similarity,
+        imageUrl: product.imageUrl?.trim() ? product.imageUrl : this.buildImageUrl(id)
+      };
+    });
   }
 
   searchProducts(query: string, topN: number): Observable<Product[]> {
@@ -49,12 +69,17 @@ export class SearchService {
     };
 
     return this.http.post<SearchProductsResponse>(this.apiUrl, graphqlQuery).pipe(
-      map((res) => (res.data?.searchProducts ?? []).map((product) => ({
-        ...product,
-        imageUrl: product.imageUrl?.trim()
-          ? product.imageUrl
-          : this.buildImageUrl(product.id)
-      })))
+      map((res) => this.normalizeProducts(res.data?.searchProducts ?? []))
+    );
+  }
+
+  searchProductsByImage(file: File, topN: number): Observable<Product[]> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('topN', String(topN));
+
+    return this.http.post<ApiProduct[]>(this.imageSearchApiUrl, formData).pipe(
+      map((products) => this.normalizeProducts(products ?? []))
     );
   }
 }

@@ -33,6 +33,29 @@
     <p class="search-panel__hint">
       Optimized for natural-language product discovery and multimodal ranking.
     </p>
+
+    <div class="search-panel__image-controls">
+      <label class="search-panel__upload-btn" for="image-search-upload">
+        Attach Image
+      </label>
+      <input
+        id="image-search-upload"
+        type="file"
+        accept="image/*"
+        (change)="onImageSelected($event)"
+      />
+      <span class="search-panel__file-name">
+        {{ selectedImageName || 'No image selected' }}
+      </span>
+      <button
+        type="button"
+        class="search-panel__image-search-btn"
+        [disabled]="!selectedImageFile"
+        (click)="onImageSearch()"
+      >
+        Search Similar Images
+      </button>
+    </div>
   </form>
 
   <div class="search-panel__quick-actions">

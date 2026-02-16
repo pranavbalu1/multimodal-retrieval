@@ -4,4 +4,4 @@ class TextRequest(BaseModel):
     text: str
 
 class EmbeddingResponse(BaseModel):
-    embedding: list
+    embedding: list[float]

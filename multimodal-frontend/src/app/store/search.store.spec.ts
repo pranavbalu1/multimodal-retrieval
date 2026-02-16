@@ -8,7 +8,10 @@ describe('SearchStore', () => {
   let searchService: jasmine.SpyObj<SearchService>;
 
   beforeEach(() => {
-    const searchServiceSpy = jasmine.createSpyObj<SearchService>('SearchService', ['searchProducts']);
+    const searchServiceSpy = jasmine.createSpyObj<SearchService>('SearchService', [
+      'searchProducts',
+      'searchProductsByImage'
+    ]);
 
     TestBed.configureTestingModule({
       providers: [SearchStore, { provide: SearchService, useValue: searchServiceSpy }]
@@ -60,5 +63,36 @@ describe('SearchStore', () => {
 
     expect(latestState?.loading).toBeFalse();
     expect(latestState?.error).toBe('Failed to fetch search results');
+  });
+
+  it('should update state on successful image search', () => {
+    const response$ = new Subject<Product[]>();
+    let latestState: SearchState | undefined;
+    const expectedProducts: Product[] = [
+      {
+        id: '1163',
+        productDisplayName: 'sample image product',
+        similarity: 0.82,
+        imageUrl: '/image/1163'
+      }
+    ];
+    const file = new Blob(['fake-image'], { type: 'image/jpeg' }) as File;
+    Object.defineProperty(file, 'name', { value: 'query.jpg' });
+
+    searchService.searchProductsByImage.and.returnValue(response$.asObservable());
+    store.state$.subscribe((state) => {
+      latestState = state;
+    });
+
+    store.performImageSearch(file, 5);
+    expect(searchService.searchProductsByImage).toHaveBeenCalledWith(file, 5);
+    expect(latestState?.loading).toBeTrue();
+    expect(latestState?.query).toContain('Image:');
+
+    response$.next(expectedProducts);
+    response$.complete();
+
+    expect(latestState?.loading).toBeFalse();
+    expect(latestState?.products.length).toBe(1);
   });
 });

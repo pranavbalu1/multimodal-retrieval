@@ -53,4 +53,43 @@ public class ProductRepository {
             throw new RuntimeException("Vector search failed", e);
         }
     }
+
+    public List<ProductDTO> searchByImageEmbedding(List<Double> embedding, int topN) {
+        try {
+            System.out.println("Image embedding size: " + embedding.size());
+
+            String vectorLiteral = embedding.toString();
+
+            String sql = """
+                SELECT
+                    id,
+                    productdisplayname,
+                    mastercategory,
+                    subcategory,
+                    basecolour,
+                    1 - (image_embedding <-> ?::vector) AS similarity
+                FROM products
+                WHERE image_embedding IS NOT NULL
+                ORDER BY image_embedding <-> ?::vector
+                LIMIT ?
+            """;
+
+            return jdbcTemplate.query(
+                sql,
+                new Object[]{vectorLiteral, vectorLiteral, topN},
+                (rs, rowNum) -> new ProductDTO(
+                        rs.getLong("id"),
+                        rs.getString("productdisplayname"),
+                        rs.getString("mastercategory"),
+                        rs.getString("subcategory"),
+                        rs.getString("basecolour"),
+                        rs.getDouble("similarity")
+                )
+            );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Image vector search failed", e);
+        }
+    }
 }

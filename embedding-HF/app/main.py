@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from app.model import EmbeddingModel
 from app.schemas import TextRequest, EmbeddingResponse
 from fastapi.responses import FileResponse
@@ -11,6 +11,28 @@ IMAGE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../data/
 @app.post("/embed/text", response_model=EmbeddingResponse)
 def embed_text(req: TextRequest):
     emb = model.embed_text(req.text)
+    return {"embedding": emb}
+
+
+@app.post("/embed/image", response_model=EmbeddingResponse)
+async def embed_image(file: UploadFile = File(...)):
+    allowed_generic_type = "application/octet-stream"
+    if (
+        file.content_type
+        and not file.content_type.startswith("image/")
+        and file.content_type != allowed_generic_type
+    ):
+        raise HTTPException(status_code=400, detail="Uploaded file must be an image")
+
+    file_bytes = await file.read()
+    if not file_bytes:
+        raise HTTPException(status_code=400, detail="Uploaded image is empty")
+
+    try:
+        emb = model.embed_image(file_bytes)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Failed to process image: {exc}") from exc
+
     return {"embedding": emb}
 
 
