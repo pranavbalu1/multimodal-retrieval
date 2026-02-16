@@ -9,8 +9,8 @@ This monorepo contains:
 - Data and ingestion scripts for preprocessing and indexing product embeddings in **Postgres + pgvector**
 
 **Developer Note:** This project uses multiple backend layers intentionally to explore and experiment with advanced system design concepts. The structure is meant for learning and exploration, not necessarily optimized for efficiency.
-<img width="1741" height="476" alt="image" src="https://github.com/user-attachments/assets/ce387b96-c136-4fe5-8e70-a440492469b8" />
 
+<img width="1741" height="476" alt="image" src="https://github.com/user-attachments/assets/ce387b96-c136-4fe5-8e70-a440492469b8" />
 
 ## Monorepo Layout
 
