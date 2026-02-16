@@ -16,15 +16,29 @@ export class ResultsGrid implements OnChanges {
   @Input() hasSearched = false;
   @Input() query = '';
   currentPage = 1;
+  private failedImageIds = new Set<string>();
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['products']) {
       this.currentPage = 1;
+      this.failedImageIds.clear();
     }
   }
 
   trackByProductId(_: number, product: Product): string {
     return product.id;
+  }
+
+  shouldShowImage(product: Product): boolean {
+    return Boolean(product.imageUrl) && !this.failedImageIds.has(product.id);
+  }
+
+  getImageUrl(product: Product): string {
+    return product.imageUrl ?? '';
+  }
+
+  handleImageError(productId: string): void {
+    this.failedImageIds.add(productId);
   }
 
   get paginatedProducts(): Product[] {

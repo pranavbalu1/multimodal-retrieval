@@ -40,7 +40,7 @@ describe('SearchService', () => {
     service.searchProducts('red rose', 5).subscribe((products) => {
       expect(products.length).toBe(1);
       expect(products[0].id).toBe('52488');
-      expect(products[0].imageUrl).toBeNull();
+      expect(products[0].imageUrl).toBe('/image/52488');
     });
 
     const req = httpMock.expectOne('/api/graphql');

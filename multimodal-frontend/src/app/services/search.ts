@@ -21,8 +21,13 @@ interface SearchProductsResponse {
 })
 export class SearchService {
   private apiUrl = '/api/graphql';
+  private imageApiPath = '/image';
 
   constructor(private http: HttpClient) {}
+
+  private buildImageUrl(itemId: string): string {
+    return `${this.imageApiPath}/${encodeURIComponent(itemId)}`;
+  }
 
   searchProducts(query: string, topN: number): Observable<Product[]> {
     const graphqlQuery = {
@@ -46,7 +51,9 @@ export class SearchService {
     return this.http.post<SearchProductsResponse>(this.apiUrl, graphqlQuery).pipe(
       map((res) => (res.data?.searchProducts ?? []).map((product) => ({
         ...product,
-        imageUrl: product.imageUrl ?? null
+        imageUrl: product.imageUrl?.trim()
+          ? product.imageUrl
+          : this.buildImageUrl(product.id)
       })))
     );
   }

@@ -79,7 +79,28 @@ describe('ResultsGrid', () => {
     expect(image.nativeElement.getAttribute('src')).toContain('product.jpg');
   });
 
-  it('should paginate results when more than 10 products are returned', () => {
+  it('should fall back to placeholder after image load error', () => {
+    component.hasSearched = true;
+    component.products = [
+      {
+        id: '52488',
+        productDisplayName: 'red rose red camisole',
+        similarity: 0.11805034707406736,
+        imageUrl: '/image/52488'
+      }
+    ];
+    fixture.detectChanges();
+
+    component.handleImageError('52488');
+    fixture.detectChanges();
+
+    const image = fixture.debugElement.query(By.css('img'));
+    const placeholder = fixture.debugElement.query(By.css('.result-card__placeholder'));
+    expect(image).toBeNull();
+    expect(placeholder).toBeTruthy();
+  });
+
+  it('should paginate results when product count exceeds page size', () => {
     component.hasSearched = true;
     component.products = Array.from({ length: 12 }, (_, index) => ({
       id: `${index + 1}`,
@@ -89,14 +110,14 @@ describe('ResultsGrid', () => {
     fixture.detectChanges();
 
     const pageOneCards = fixture.debugElement.queryAll(By.css('.result-card'));
-    expect(pageOneCards.length).toBe(10);
-    expect(fixture.nativeElement.textContent).toContain('Showing 1-10 of 12');
+    expect(pageOneCards.length).toBe(component.pageSize);
+    expect(fixture.nativeElement.textContent).toContain(`Showing 1-${component.pageSize} of 12`);
 
     component.goToPage(2);
     fixture.detectChanges();
 
     const pageTwoCards = fixture.debugElement.queryAll(By.css('.result-card'));
-    expect(pageTwoCards.length).toBe(2);
-    expect(fixture.nativeElement.textContent).toContain('Showing 11-12 of 12');
+    expect(pageTwoCards.length).toBe(12 - component.pageSize);
+    expect(fixture.nativeElement.textContent).toContain(`Showing ${component.pageSize + 1}-12 of 12`);
   });
 });

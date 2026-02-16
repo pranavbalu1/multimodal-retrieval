@@ -19,7 +19,7 @@ export class SearchBar {
   query = '';
   topN = 20;
   readonly quickQueries = [
-    'red floral nightdress',
+    'red floral dress',
     'formal black blazer',
     'running shoes for men'
   ];

@@ -14,10 +14,11 @@
     >
       <div class="result-card__media">
         <img
-          *ngIf="product.imageUrl; else imagePlaceholder"
-          [src]="product.imageUrl"
+          *ngIf="shouldShowImage(product); else imagePlaceholder"
+          [src]="getImageUrl(product)"
           [alt]="product.productDisplayName"
           loading="lazy"
+          (error)="handleImageError(product.id)"
         />
         <ng-template #imagePlaceholder>
           <div class="result-card__placeholder">
