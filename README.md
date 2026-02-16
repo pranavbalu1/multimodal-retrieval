@@ -1,289 +1,260 @@
-# Multimodal Fashion Vector Search Engine
+# Multimodal Search Monorepo
 
-## Overview
+An end-to-end semantic product search system for fashion catalog data.
 
-This project implements a semantic vector search engine for a fashion product dataset (~44,000 products). It transforms product metadata into dense numerical embeddings using a transformer model and stores them inside PostgreSQL using the pgvector extension for efficient similarity search.
+This monorepo contains:
+- A **FastAPI embedding service** (Python) that generates normalized text embeddings and serves product images
+- A **Spring Boot GraphQL API** (Java) that orchestrates embedding + vector search in Postgres
+- An **Angular frontend** (TypeScript) with a Redux-style store, enterprise UI, and paginated result grid
+- Data and ingestion scripts for preprocessing and indexing product embeddings in **Postgres + pgvector**
 
-The system enables semantic search — meaning queries are matched based on meaning rather than exact keyword overlap.
+## Monorepo Layout
 
----
-
-# What Has Been Built So Far
-
-## 1. Data Pipeline
-
-### Dataset
-
-* ~44,000 fashion products
-* Metadata fields such as:
-
-  * productDisplayName
-  * masterCategory
-  * subCategory
-  * articleType
-  * baseColour
-
-### Preprocessing
-
-Text fields are:
-
-* Lowercased
-* Stripped of null values
-* Concatenated into a single field: `text_for_embedding`
-
-Example:
-
-```
-"men black casual shirt shirts topwear black"
+```text
+multimodal-search/
+|- backend-spring/                 # Spring Boot GraphQL API (Java)
+|  \- multimodal/
+|- embedding-HF/                   # FastAPI embedding and image service (Python)
+|  |- app/
+|  |- preprocess.py
+|  \- embeddings.py
+|- multimodal-frontend/            # Angular app (UI + client state)
+|- data/                           # styles.csv, preprocessed CSV, images/
+|- docker-compose.yml              # Postgres + pgvector
+\- README.md
 ```
 
-This produces richer semantic context for embedding.
+## What Each Part Does
 
----
+### 1) `embedding-HF` (Python, FastAPI)
 
-## 2. Embedding Model
+Core files:
+- `embedding-HF/app/main.py`
+- `embedding-HF/app/model.py`
+- `embedding-HF/app/schemas.py`
 
-We use a Sentence Transformer model (MiniLM architecture).
+Responsibilities:
+- `POST /embed/text`
+  - Receives raw query text
+  - Uses `sentence-transformers/all-MiniLM-L6-v2`
+  - Returns a normalized embedding vector
+- `GET /image/{item_id}`
+  - Serves product image files from `data/images` by ID (`.jpg`, `.jpeg`, `.png`)
+  - Used by the frontend to render result images
 
-### What is an Embedding?
+### 2) `backend-spring` (Java, Spring Boot + GraphQL)
 
-An embedding is a mapping from text → vector in ℝ^d.
+Core files:
+- `backend-spring/multimodal/src/main/resources/graphql/schema.graphqls`
+- `backend-spring/multimodal/src/main/java/com/example/multimodal/controller/SearchController.java`
+- `backend-spring/multimodal/src/main/java/com/example/multimodal/service/SearchService.java`
+- `backend-spring/multimodal/src/main/java/com/example/multimodal/repository/ProductRepository.java`
 
-For this model:
+Responsibilities:
+- Exposes GraphQL query:
+  - `searchProducts(query: String!, topN: Int!): [Product]`
+- On each search:
+  1. Calls FastAPI `POST /embed/text` to embed the user query
+  2. Queries Postgres via `pgvector` nearest-neighbor search
+  3. Returns ranked products with similarity score
 
-* Dimension: 384
-* Output: A 384-dimensional floating point vector
+### 3) `multimodal-frontend` (Angular)
 
-Mathematically:
+Core files:
+- `multimodal-frontend/src/app/services/search.ts`
+- `multimodal-frontend/src/app/store/search.store.ts`
+- `multimodal-frontend/src/app/components/search-bar/*`
+- `multimodal-frontend/src/app/components/results-grid/*`
 
-Let:
+Responsibilities:
+- Calls GraphQL search endpoint via `/api/graphql` (proxied to Spring)
+- Builds image URL per product as `/image/{id}` (proxied to FastAPI)
+- Handles loading/error/results state using a Redux-style local store
+- Supports:
+  - query input
+  - user-selectable `topN`
+  - result cards with image fallback
+  - client-side pagination
 
-f(x) : Text → ℝ^384
+### 4) `data` and ingestion scripts
 
-Where x is a product description.
+Core files:
+- `data/styles.csv`
+- `data/preprocessed_products.csv`
+- `embedding-HF/preprocess.py`
+- `embedding-HF/embeddings.py`
 
-Each product becomes:
+Responsibilities:
+- Clean and concatenate metadata into `text_for_embedding`
+- Generate embeddings in batches
+- Insert into `products` table
+- Create `ivfflat` vector index for faster retrieval
 
-v ∈ ℝ^384
+## End-to-End Request Flow
 
-These vectors are normalized:
+1. User submits search query in Angular UI
+2. Frontend dispatches search action to local store
+3. Frontend sends GraphQL query to Spring:
+   - `POST /api/graphql` (dev proxy -> `http://localhost:8080/graphql`)
+4. Spring calls FastAPI:
+   - `POST http://localhost:8000/embed/text`
+5. Spring runs vector similarity query in Postgres (`pgvector`)
+6. Spring returns ranked products + similarity
+7. Frontend renders cards and requests image URLs:
+   - `/image/{id}` (dev proxy -> `http://localhost:8000/image/{id}`)
 
-v_normalized = v / ||v||₂
+## Redux-Style State in the Frontend
+
+This repo uses a Redux pattern implemented with RxJS (not NgRx package).
 
 Where:
+- `SearchState` is the single app-search state shape
+- `SearchAction` describes state transitions
+- `searchReducer(state, action)` is pure transition logic
+- `SearchStore` holds state in a `BehaviorSubject` and exposes `state$`
 
-||v||₂ = sqrt(Σ vᵢ²)
+State transitions:
+- `SEARCH_REQUEST` -> set loading, clear old results, persist current query
+- `SEARCH_SUCCESS` -> store products, stop loading
+- `SEARCH_FAILURE` -> store error, stop loading
 
-This ensures cosine similarity works efficiently.
+This makes UI state deterministic and easy to reason about.
 
----
+## Theory (Short Version)
 
-## 3. Cosine Similarity (Core Math)
+### Embeddings
 
-To measure similarity between two embeddings:
+A text embedding maps a string to a dense vector in `R^d`.
 
-Given vectors a and b:
+Here:
+- model: `all-MiniLM-L6-v2`
+- dimension: 384
+- normalization: `v_norm = v / ||v||_2`
 
-Cosine similarity:
+Normalization allows cosine similarity to align with dot-product behavior.
 
-sim(a, b) = (a · b) / (||a|| ||b||)
+### Cosine Similarity
 
-Since vectors are normalized:
+Given vectors `a` and `b`:
 
-sim(a, b) = a · b
+`cos_sim(a, b) = (a . b) / (||a|| * ||b||)`
 
-This reduces similarity to a simple dot product.
+With normalized vectors, ranking by cosine similarity is efficient and stable.
 
-Interpretation:
+### Approximate Nearest Neighbor Search (ANN)
 
-* 1 → identical direction (very similar)
-* 0 → orthogonal (unrelated)
-* -1 → opposite meaning
+The `ivfflat` pgvector index clusters vectors and searches likely partitions first.
 
-In PostgreSQL with pgvector, cosine distance is implemented via:
+Tradeoff:
+- Much faster retrieval at scale
+- Slight approximation vs brute-force exact scan
 
-```
-embedding <-> query_vector
-```
+For product search, this is usually the right latency/quality tradeoff.
 
-Lower distance = more similar.
+## Local Setup
 
----
+### 1) Prerequisites
 
-## 4. Database Architecture
+- Python 3.10+
+- Java 17
+- Node 20+ (Angular 21 requires modern Node)
+- Docker
 
-### PostgreSQL + pgvector
+### 2) Start Postgres (pgvector)
 
-We extended PostgreSQL with vector support:
+From repo root:
 
-```
-CREATE EXTENSION vector;
-```
-
-### Table Schema
-
-```
-products (
-    id BIGINT PRIMARY KEY,
-    productDisplayName TEXT,
-    masterCategory TEXT,
-    subCategory TEXT,
-    articleType TEXT,
-    baseColour TEXT,
-    embedding VECTOR(384)
-)
+```bash
+docker compose up -d
 ```
 
-Each row contains:
+Database defaults are in:
+- `docker-compose.yml`
+- `backend-spring/multimodal/src/main/resources/application.properties`
 
-* Raw metadata
-* A 384-dimensional embedding vector
+### 3) Prepare and ingest data (Python)
 
----
+From `embedding-HF`:
 
-## 5. Approximate Nearest Neighbor Index
-
-We created an IVFFLAT index:
-
-```
-CREATE INDEX products_embedding_idx
-ON products
-USING ivfflat (embedding vector_cosine_ops)
-WITH (lists = 100);
+```bash
+python preprocess.py
+python embeddings.py
 ```
 
-### Why This Matters
+This prepares text and loads embeddings into Postgres.
 
-Without indexing:
+### 4) Start FastAPI service
 
-Similarity search = O(n)
+From `embedding-HF`:
 
-With IVFFLAT:
+```bash
+uvicorn app.main:app --reload --port 8000
+```
 
-Search becomes approximately:
+### 5) Start Spring GraphQL API
 
-O(log n)
+From `backend-spring/multimodal`:
 
-Conceptually:
+```bash
+./mvnw spring-boot:run
+```
 
-1. Vectors are clustered into partitions
-2. Query vector searches only nearest clusters
-3. Returns approximate nearest neighbors
+Runs on `http://localhost:8080`.
 
-This enables:
+### 6) Start Angular frontend
 
-* Sub-second search
-* Scalability to millions of vectors
+From `multimodal-frontend`:
 
----
+```bash
+npm install
+npm start
+```
 
-## 6. End-to-End Pipeline
+Runs on `http://localhost:4200` with proxy routes:
+- `/api` -> Spring
+- `/image` -> FastAPI
 
-System flow:
+Proxy config:
+- `multimodal-frontend/proxy.conf.json`
 
-1. Load dataset
-2. Clean and concatenate text
-3. Generate embeddings (384-dim)
-4. Normalize vectors
-5. Insert into PostgreSQL
-6. Build ANN index
+## API Reference (Current)
 
-Result:
+### GraphQL (Spring)
 
-A production-grade semantic search backend.
+Query:
 
----
+```graphql
+query SearchProducts($query: String!, $topN: Int!) {
+  searchProducts(query: $query, topN: $topN) {
+    id
+    productDisplayName
+    similarity
+    masterCategory
+    subCategory
+    baseColour
+  }
+}
+```
 
-# Theoretical Foundations
+### FastAPI (Python)
 
-## Transformer Architecture
+- `POST /embed/text`
+  - Body: `{ "text": "red dress" }`
+  - Response: `{ "embedding": [ ... ] }`
 
-MiniLM is a distilled Transformer.
+- `GET /image/{item_id}`
+  - Returns image bytes if file exists
+  - Returns `404` if not found
 
-Core idea:
+## Current Scope and Notes
 
-Self-attention computes contextual representations.
+- Retrieval is currently text-embedding driven.
+- Images are currently used for result display and can be extended to true image-embedding retrieval later.
+- Some scripts/config are still tuned for local development defaults (localhost, fixed creds).
 
-Attention mechanism:
+## Suggested Next Improvements
 
-Attention(Q, K, V) = softmax(QKᵀ / sqrt(d_k)) V
-
-Where:
-
-* Q = query matrix
-* K = key matrix
-* V = value matrix
-
-This allows each token to attend to every other token.
-
-The final embedding is typically derived from the [CLS] token or mean pooling.
-
----
-
-## Vector Space Semantics
-
-Embedding models learn to position semantically similar items close together in vector space.
-
-Properties:
-
-* "black dress" near "evening black gown"
-* "running shoes" near "sports sneakers"
-
-Distance in vector space ≈ semantic similarity.
-
-This is based on distributional semantics:
-
-"You shall know a word by the company it keeps."
-
----
-
-## Complexity Analysis
-
-Without index:
-
-Query cost = O(n · d)
-
-Where:
-
-* n = number of products (44,424)
-* d = embedding dimension (384)
-
-With IVFFLAT:
-
-Query cost ≈ O(k · d)
-
-Where:
-
-* k << n
-
-This makes large-scale search feasible.
-
----
-
-# Current System Diagram
-
-Dataset
-↓
-Preprocessing
-↓
-Transformer Embeddings (384-dim)
-↓
-PostgreSQL + pgvector
-↓
-IVFFLAT ANN Index
-↓
-Semantic Similarity Search
-
----
-
-# Summary
-
-You have built a semantic vector search engine using:
-
-* Transformer-based embeddings
-* High-dimensional vector representations
-* Cosine similarity mathematics
-* Approximate nearest neighbor indexing
-* PostgreSQL as a vector database
-
-This forms the mathematical and architectural core of modern AI search systems.
+1. Add environment-based config for ports, DB credentials, and service URLs.
+2. Add integration tests that cover the full query -> embedding -> DB -> UI flow.
+3. Add observability (structured logs + request tracing) across all three services.
+4. Add optional hybrid ranking (semantic score + keyword/business metadata).
