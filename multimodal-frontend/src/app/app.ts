@@ -27,16 +27,19 @@ import { SearchState, SearchStore } from './store/search.store';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class App {
+  // Single observable state source for the full page.
   state$: Observable<SearchState>;
 
   constructor(private searchStore: SearchStore) {
     this.state$ = this.searchStore.state$;
   }
 
+  // Handle text search event emitted by search-bar component.
   performSearch(request: SearchRequest) {
     this.searchStore.performSearch(request.query, request.topN);
   }
 
+  // Handle image search event emitted by search-bar component.
   performImageSearch(request: ImageSearchRequest) {
     this.searchStore.performImageSearch(request.file, request.topN);
   }

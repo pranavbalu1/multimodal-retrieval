@@ -9,21 +9,29 @@ import java.util.List;
 @Repository
 public class ProductRepository {
 
+    // Low-level SQL executor provided by Spring JDBC.
     private final JdbcTemplate jdbcTemplate;
 
     public ProductRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * Query nearest products for a text embedding vector.
+     */
     public List<ProductDTO> searchByEmbedding(List<Double> embedding, int topN) {
         try {
             System.out.println("Embedding size: " + embedding.size());
 
-            // Convert list to string literal suitable for pgvector
-            String vectorLiteral = embedding.toString(); // e.g., "[0.1, 0.2, 0.3]"
+            // pgvector accepts array-like literal strings, e.g. [0.1, 0.2, ...].
+            String vectorLiteral = embedding.toString();
 
+            // Notes:
+            // - `<->` returns vector distance (smaller = closer).
+            // - We also expose similarity as `1 - distance` for UI readability.
+            // - We pass vectorLiteral twice: once for projection, once for ORDER BY.
             String sql = """
-                SELECT 
+                SELECT
                     id,
                     productdisplayname,
                     mastercategory,
@@ -36,16 +44,16 @@ public class ProductRepository {
             """;
 
             return jdbcTemplate.query(
-                sql,
-                new Object[]{vectorLiteral, vectorLiteral, topN},
-                (rs, rowNum) -> new ProductDTO(
-                        rs.getLong("id"),
-                        rs.getString("productdisplayname"),
-                        rs.getString("mastercategory"),
-                        rs.getString("subcategory"),
-                        rs.getString("basecolour"),
-                        rs.getDouble("similarity")
-                )
+                    sql,
+                    new Object[]{vectorLiteral, vectorLiteral, topN},
+                    (rs, rowNum) -> new ProductDTO(
+                            rs.getLong("id"),
+                            rs.getString("productdisplayname"),
+                            rs.getString("mastercategory"),
+                            rs.getString("subcategory"),
+                            rs.getString("basecolour"),
+                            rs.getDouble("similarity")
+                    )
             );
 
         } catch (Exception e) {
@@ -54,12 +62,17 @@ public class ProductRepository {
         }
     }
 
+    /**
+     * Query nearest products for an image embedding vector.
+     */
     public List<ProductDTO> searchByImageEmbedding(List<Double> embedding, int topN) {
         try {
             System.out.println("Image embedding size: " + embedding.size());
 
             String vectorLiteral = embedding.toString();
 
+            // Same retrieval pattern as text search, but on image_embedding column.
+            // We filter null values to avoid distance operations on missing vectors.
             String sql = """
                 SELECT
                     id,
@@ -75,16 +88,16 @@ public class ProductRepository {
             """;
 
             return jdbcTemplate.query(
-                sql,
-                new Object[]{vectorLiteral, vectorLiteral, topN},
-                (rs, rowNum) -> new ProductDTO(
-                        rs.getLong("id"),
-                        rs.getString("productdisplayname"),
-                        rs.getString("mastercategory"),
-                        rs.getString("subcategory"),
-                        rs.getString("basecolour"),
-                        rs.getDouble("similarity")
-                )
+                    sql,
+                    new Object[]{vectorLiteral, vectorLiteral, topN},
+                    (rs, rowNum) -> new ProductDTO(
+                            rs.getLong("id"),
+                            rs.getString("productdisplayname"),
+                            rs.getString("mastercategory"),
+                            rs.getString("subcategory"),
+                            rs.getString("basecolour"),
+                            rs.getDouble("similarity")
+                    )
             );
 
         } catch (Exception e) {
